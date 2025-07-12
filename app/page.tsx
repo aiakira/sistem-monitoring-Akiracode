@@ -25,7 +25,6 @@ interface ChartData {
   humidity: number
 }
 
-// Enhanced Floating Particles Component
 const FloatingParticles = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [allParticles, setAllParticles] = useState<any[]>([])
@@ -39,34 +38,33 @@ const FloatingParticles = () => {
   }, [])
 
   useEffect(() => {
-    // Generate particles only on client
-  const floatingParticles = Array.from({ length: 25 }, (_, i) => ({
-    id: `float-${i}`,
-    size: Math.random() * 3 + 1,
-    x: Math.random() * 100,
-    y: Math.random() * 100,
-    duration: Math.random() * 25 + 15,
-    delay: Math.random() * 10,
-    type: "float",
-  }))
-  const glowParticles = Array.from({ length: 12 }, (_, i) => ({
-    id: `glow-${i}`,
-    size: Math.random() * 4 + 2,
-    x: Math.random() * 100,
-    y: Math.random() * 100,
-    duration: Math.random() * 4 + 2,
-    delay: Math.random() * 3,
-    type: "glow",
-  }))
-  const orbitParticles = Array.from({ length: 6 }, (_, i) => ({
-    id: `orbit-${i}`,
-    size: Math.random() * 2 + 1,
-    x: 20 + i * 12,
-    y: 20 + i * 10,
-    duration: Math.random() * 6 + 4,
-    delay: Math.random() * 2,
-    type: "orbit",
-  }))
+    const floatingParticles = Array.from({ length: 25 }, (_, i) => ({
+      id: `float-${i}`,
+      size: Math.random() * 3 + 1,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      duration: Math.random() * 25 + 15,
+      delay: Math.random() * 10,
+      type: "float",
+    }))
+    const glowParticles = Array.from({ length: 12 }, (_, i) => ({
+      id: `glow-${i}`,
+      size: Math.random() * 4 + 2,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      duration: Math.random() * 4 + 2,
+      delay: Math.random() * 3,
+      type: "glow",
+    }))
+    const orbitParticles = Array.from({ length: 6 }, (_, i) => ({
+      id: `orbit-${i}`,
+      size: Math.random() * 2 + 1,
+      x: 20 + i * 12,
+      y: 20 + i * 10,
+      duration: Math.random() * 6 + 4,
+      delay: Math.random() * 2,
+      type: "orbit",
+    }))
     setAllParticles([...floatingParticles, ...glowParticles, ...orbitParticles])
   }, [])
 
@@ -163,7 +161,6 @@ export default function AirPollutionMonitor() {
   const [showDataHistory, setShowDataHistory] = useState(false)
   const [showGuide, setShowGuide] = useState(false)
 
-  // Data kualitas udara Sulawesi Selatan dari berbagai kota
   const [sulselAirQuality, setSulselAirQuality] = useState([
     { city: "Makassar", aqi: 85, status: "Sedang", co: 12.5, co2: 480, temp: 28.5 },
     { city: "Parepare", aqi: 72, status: "Sedang", co: 9.8, co2: 420, temp: 27.2 },
@@ -172,7 +169,6 @@ export default function AirPollutionMonitor() {
     { city: "Bulukumba", aqi: 62, status: "Sedang", co: 8.1, co2: 395, temp: 26.9 },
   ])
 
-  // Notification functions
   const requestNotificationPermission = async () => {
     if ("Notification" in window) {
       const permission = await Notification.requestPermission()
@@ -185,7 +181,6 @@ export default function AirPollutionMonitor() {
   const playNotificationSound = (type: "warning" | "danger" | "critical") => {
     if (!soundEnabled) return
 
-    // Create audio context for notification sounds
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
     const oscillator = audioContext.createOscillator()
     const gainNode = audioContext.createGain()
@@ -193,7 +188,6 @@ export default function AirPollutionMonitor() {
     oscillator.connect(gainNode)
     gainNode.connect(audioContext.destination)
 
-    // Different frequencies for different alert levels
     const frequencies = {
       warning: 800,
       danger: 1000,
@@ -221,9 +215,8 @@ export default function AirPollutionMonitor() {
       read: false,
     }
 
-    setNotifications((prev) => [notification, ...prev.slice(0, 9)]) // Keep only 10 notifications
+    setNotifications((prev) => [notification, ...prev.slice(0, 9)])
 
-    // Browser notification
     if (notificationPermission === "granted" && notificationsEnabled) {
       const browserNotification = new Notification(title, {
         body: message,
@@ -238,13 +231,11 @@ export default function AirPollutionMonitor() {
         browserNotification.close()
       }
 
-      // Auto close after 5 seconds for non-critical notifications
       if (type !== "critical") {
         setTimeout(() => browserNotification.close(), 5000)
       }
     }
 
-    // Play sound for warnings and above
     if (type !== "info") {
       playNotificationSound(type as "warning" | "danger" | "critical")
     }
@@ -253,7 +244,6 @@ export default function AirPollutionMonitor() {
   const checkAirQualityAlerts = (data: SensorData) => {
     const { mq135, mq7 } = data
 
-    // AQI Alerts
     if (mq135 > 300) {
       showNotification(
         "🚨 BAHAYA EKSTREM!",
@@ -280,7 +270,6 @@ export default function AirPollutionMonitor() {
       )
     }
 
-    // CO Alerts
     if (mq7 > 50) {
       showNotification(
         "🚨 BAHAYA CO TINGGI!",
@@ -302,7 +291,6 @@ export default function AirPollutionMonitor() {
     }
   }
 
-  // Fetch current sensor data
   const fetchCurrentData = async () => {
     try {
       const response = await fetch("/api/sensor-data")
@@ -323,7 +311,6 @@ export default function AirPollutionMonitor() {
     }
   }
 
-  // Fetch historical data for charts
   const fetchHistoryData = async () => {
     try {
       const response = await fetch("/api/sensor-history")
@@ -338,25 +325,20 @@ export default function AirPollutionMonitor() {
     }
   }
 
-  // Initialize notifications
   useEffect(() => {
     requestNotificationPermission()
   }, [])
 
-  // Monitor air quality changes for alerts
   useEffect(() => {
     checkAirQualityAlerts(currentData)
   }, [currentData])
 
-  // Fetch data on component mount and set up polling
   useEffect(() => {
-    // Initial fetch
     fetchCurrentData()
     fetchHistoryData()
 
-    // Set up polling every 30 seconds
-    const currentDataInterval = setInterval(fetchCurrentData, 5000) // Update setiap 5 detik
-    const historyDataInterval = setInterval(fetchHistoryData, 10000) // Update history setiap 10 detik
+    const currentDataInterval = setInterval(fetchCurrentData, 5000)
+    const historyDataInterval = setInterval(fetchHistoryData, 10000)
 
     return () => {
       clearInterval(currentDataInterval)
@@ -364,7 +346,6 @@ export default function AirPollutionMonitor() {
     }
   }, [])
 
-  // Update last update time
   useEffect(() => {
     setLastUpdate(new Date().toLocaleTimeString("id-ID"))
   }, [])
@@ -394,7 +375,7 @@ export default function AirPollutionMonitor() {
 
   const aqiStatus = getAQIStatus(currentData.mq135)
   const coStatus = getCOStatus(currentData.mq7)
-  const co2Value = currentData.mq135 // Tampilkan nilai asli dari database
+  const co2Value = currentData.mq135
   const co2Status = getCO2Status(co2Value)
 
   const handleClearNotifications = () => {
@@ -413,7 +394,6 @@ export default function AirPollutionMonitor() {
     setShowGuide(true)
   }
 
-  // Dummy/agregasi data mingguan
   const weeklyChartData = [
     { day: "Senin", mq135: 120, mq7: 80 },
     { day: "Selasa", mq135: 110, mq7: 75 },
@@ -561,7 +541,7 @@ export default function AirPollutionMonitor() {
                       <Line
                         type="monotone"
                       dataKey="mq135"
-                      stroke="#2563eb" // Biru kontras
+                      stroke="#2563eb"
                       strokeWidth={4}
                       dot={{ fill: "#facc15", r: 6, stroke: "#2563eb", strokeWidth: 2 }}
                       activeDot={{ r: 8, fill: "#facc15", stroke: "#2563eb", strokeWidth: 3 }}

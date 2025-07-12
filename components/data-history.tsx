@@ -42,14 +42,13 @@ export function DataHistory() {
   const [isLoading, setIsLoading] = useState(false)
   const [isOpen, setIsOpen] = useState(true)
 
-  // Generate sample data
   useEffect(() => {
     const generateSampleData = () => {
       const sampleData: DataRecord[] = []
       const now = new Date()
 
       for (let i = 0; i < 50; i++) {
-        const timestamp = new Date(now.getTime() - i * 30 * 60 * 1000) // Every 30 minutes
+        const timestamp = new Date(now.getTime() - i * 30 * 60 * 1000)
         const aqi = Math.floor(Math.random() * 200) + 20
         const co = Math.random() * 30 + 5
 
@@ -77,11 +76,9 @@ export function DataHistory() {
     generateSampleData()
   }, [])
 
-  // Filter and search functionality
   useEffect(() => {
     let filtered = dataRecords
 
-    // Search filter
     if (searchTerm) {
       filtered = filtered.filter(
         (record) =>
@@ -90,12 +87,10 @@ export function DataHistory() {
       )
     }
 
-    // Status filter
     if (statusFilter !== "all") {
       filtered = filtered.filter((record) => record.status === statusFilter)
     }
 
-    // Date filter
     if (dateFilter !== "all") {
       const now = new Date()
       const filterDate = new Date()
@@ -120,7 +115,6 @@ export function DataHistory() {
     setCurrentPage(1)
   }, [searchTerm, statusFilter, dateFilter, dataRecords])
 
-  // Pagination
   const indexOfLastRecord = currentPage * recordsPerPage
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage
   const currentRecords = filteredRecords.slice(indexOfFirstRecord, indexOfLastRecord)
@@ -195,7 +189,6 @@ export function DataHistory() {
 
   const refreshData = () => {
     setIsLoading(true)
-    // Simulate data refresh
     setTimeout(() => {
       setIsLoading(false)
     }, 2000)
