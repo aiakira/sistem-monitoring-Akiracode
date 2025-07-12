@@ -1,0 +1,34 @@
+{
+  "airQuality": {
+    "current": {
+      "co": 12.5,
+      "aqi": 85,
+      "temperature": 28.5,
+      "humidity": 65.2,
+      "timestamp": "2024-01-15T10:30:00Z",
+      "location": "Jakarta, Indonesia"
+    },
+    "history": {
+      "1": {
+        "co": 10.2,
+        "aqi": 78,
+        "timestamp": "2024-01-15T10:00:00Z"
+      },
+      "2": {
+        "co": 11.8,
+        "aqi": 82,
+        "timestamp": "2024-01-15T10:05:00Z"
+      },
+      "3": {
+        "co": 12.1,
+        "aqi": 84,
+        "timestamp": "2024-01-15T10:10:00Z"
+      },
+      "4": {
+        "co": 12.5,
+        "aqi": 85,
+        "timestamp": "2024-01-15T10:15:00Z"
+      }
+    }
+  }
+}
