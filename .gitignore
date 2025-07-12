@@ -1,13 +1,10 @@
 /node_modules
 /.pnp
 .pnp.js
-
 /coverage
-
 /build
 .next/
 out/
-
 .DS_Store
 *.log
 npm-debug.log*
@@ -18,7 +15,6 @@ pnpm-debug.log*
 .vscode/
 .vercel/
 next-env.d.ts
-
 .env
 .env.*
 !.env.example

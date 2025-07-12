@@ -9,7 +9,7 @@ CREATE TABLE sensor_readings (
 
 CREATE INDEX IF NOT EXISTS idx_sensor_readings_created_at ON sensor_readings(created_at DESC);
 
-INSERT INTO sensor_readings (temperature, humidity, co_level, air_quality) VALUES
+INSERT INTO sensor_readings (temperature, humidity, mq7, mq135) VALUES
 (28.5, 65.2, 12.5, 85),
 (29.1, 63.8, 11.2, 78),
 (27.9, 67.1, 13.8, 92),

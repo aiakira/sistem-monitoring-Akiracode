@@ -95,7 +95,7 @@
   box-shadow: 0 0 10px #38bdf8;
   border-radius: 9999px;
   overflow: hidden;
-}
+  }
 .neon-progress-bar {
   background: linear-gradient(90deg, #38bdf8, #a78bfa);
   box-shadow: 0 0 20px #38bdf8;

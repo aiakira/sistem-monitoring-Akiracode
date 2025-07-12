@@ -40,33 +40,33 @@ const FloatingParticles = () => {
 
   useEffect(() => {
     // Generate particles only on client
-    const floatingParticles = Array.from({ length: 25 }, (_, i) => ({
-      id: `float-${i}`,
-      size: Math.random() * 3 + 1,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      duration: Math.random() * 25 + 15,
-      delay: Math.random() * 10,
-      type: "float",
-    }))
-    const glowParticles = Array.from({ length: 12 }, (_, i) => ({
-      id: `glow-${i}`,
-      size: Math.random() * 4 + 2,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      duration: Math.random() * 4 + 2,
-      delay: Math.random() * 3,
-      type: "glow",
-    }))
-    const orbitParticles = Array.from({ length: 6 }, (_, i) => ({
-      id: `orbit-${i}`,
-      size: Math.random() * 2 + 1,
-      x: 20 + i * 12,
-      y: 20 + i * 10,
-      duration: Math.random() * 6 + 4,
-      delay: Math.random() * 2,
-      type: "orbit",
-    }))
+  const floatingParticles = Array.from({ length: 25 }, (_, i) => ({
+    id: `float-${i}`,
+    size: Math.random() * 3 + 1,
+    x: Math.random() * 100,
+    y: Math.random() * 100,
+    duration: Math.random() * 25 + 15,
+    delay: Math.random() * 10,
+    type: "float",
+  }))
+  const glowParticles = Array.from({ length: 12 }, (_, i) => ({
+    id: `glow-${i}`,
+    size: Math.random() * 4 + 2,
+    x: Math.random() * 100,
+    y: Math.random() * 100,
+    duration: Math.random() * 4 + 2,
+    delay: Math.random() * 3,
+    type: "glow",
+  }))
+  const orbitParticles = Array.from({ length: 6 }, (_, i) => ({
+    id: `orbit-${i}`,
+    size: Math.random() * 2 + 1,
+    x: 20 + i * 12,
+    y: 20 + i * 10,
+    duration: Math.random() * 6 + 4,
+    delay: Math.random() * 2,
+    type: "orbit",
+  }))
     setAllParticles([...floatingParticles, ...glowParticles, ...orbitParticles])
   }, [])
 
@@ -355,8 +355,8 @@ export default function AirPollutionMonitor() {
     fetchHistoryData()
 
     // Set up polling every 30 seconds
-    const currentDataInterval = setInterval(fetchCurrentData, 30000)
-    const historyDataInterval = setInterval(fetchHistoryData, 60000) // Update history every minute
+    const currentDataInterval = setInterval(fetchCurrentData, 5000) // Update setiap 5 detik
+    const historyDataInterval = setInterval(fetchHistoryData, 10000) // Update history setiap 10 detik
 
     return () => {
       clearInterval(currentDataInterval)
@@ -394,7 +394,7 @@ export default function AirPollutionMonitor() {
 
   const aqiStatus = getAQIStatus(currentData.mq135)
   const coStatus = getCOStatus(currentData.mq7)
-  const co2Value = currentData.mq135 * 10 + 400 // Konversi dari AQI ke CO2 simulasi
+  const co2Value = currentData.mq135 // Tampilkan nilai asli dari database
   const co2Status = getCO2Status(co2Value)
 
   const handleClearNotifications = () => {
@@ -551,22 +551,22 @@ export default function AirPollutionMonitor() {
             </div>
             <div className="p-6">
               <div className="h-[250px] w-full overflow-hidden">
-                <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.2)" />
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.2)" />
                     <XAxis dataKey="time" stroke="#ffffff" fontSize={12} tick={{ fill: "#ffffff", fontSize: 12 }} />
                     <YAxis stroke="#ffffff" fontSize={12} tick={{ fill: "#ffffff", fontSize: 12 }} />
                     <Tooltip contentStyle={{ backgroundColor: "rgba(0,0,0,0.8)", color: "white", borderRadius: 8, border: "1px solid #fff2" }} />
                     <Legend wrapperStyle={{ color: "white" }} />
-                    <Line
-                      type="monotone"
+                      <Line
+                        type="monotone"
                       dataKey="mq135"
                       stroke="#2563eb" // Biru kontras
                       strokeWidth={4}
                       dot={{ fill: "#facc15", r: 6, stroke: "#2563eb", strokeWidth: 2 }}
                       activeDot={{ r: 8, fill: "#facc15", stroke: "#2563eb", strokeWidth: 3 }}
                       name="CO2 (MQ135) ppm"
-                    />
+                      />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
@@ -593,7 +593,7 @@ export default function AirPollutionMonitor() {
                     <Legend wrapperStyle={{ color: "white" }} />
                     <Line type="monotone" dataKey="mq7" stroke="#f97316" strokeWidth={3} dot={{ fill: "#f97316", r: 4 }} name="CO (MQ7) ppm" />
                   </LineChart>
-                </ResponsiveContainer>
+                  </ResponsiveContainer>
               </div>
             </div>
           </div>
