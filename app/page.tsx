@@ -38,33 +38,33 @@ const FloatingParticles = () => {
   }, [])
 
   useEffect(() => {
-    const floatingParticles = Array.from({ length: 25 }, (_, i) => ({
-      id: `float-${i}`,
-      size: Math.random() * 3 + 1,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      duration: Math.random() * 25 + 15,
-      delay: Math.random() * 10,
-      type: "float",
-    }))
-    const glowParticles = Array.from({ length: 12 }, (_, i) => ({
-      id: `glow-${i}`,
-      size: Math.random() * 4 + 2,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      duration: Math.random() * 4 + 2,
-      delay: Math.random() * 3,
-      type: "glow",
-    }))
-    const orbitParticles = Array.from({ length: 6 }, (_, i) => ({
-      id: `orbit-${i}`,
-      size: Math.random() * 2 + 1,
-      x: 20 + i * 12,
-      y: 20 + i * 10,
-      duration: Math.random() * 6 + 4,
-      delay: Math.random() * 2,
-      type: "orbit",
-    }))
+  const floatingParticles = Array.from({ length: 25 }, (_, i) => ({
+    id: `float-${i}`,
+    size: Math.random() * 3 + 1,
+    x: Math.random() * 100,
+    y: Math.random() * 100,
+    duration: Math.random() * 25 + 15,
+    delay: Math.random() * 10,
+    type: "float",
+  }))
+  const glowParticles = Array.from({ length: 12 }, (_, i) => ({
+    id: `glow-${i}`,
+    size: Math.random() * 4 + 2,
+    x: Math.random() * 100,
+    y: Math.random() * 100,
+    duration: Math.random() * 4 + 2,
+    delay: Math.random() * 3,
+    type: "glow",
+  }))
+  const orbitParticles = Array.from({ length: 6 }, (_, i) => ({
+    id: `orbit-${i}`,
+    size: Math.random() * 2 + 1,
+    x: 20 + i * 12,
+    y: 20 + i * 10,
+    duration: Math.random() * 6 + 4,
+    delay: Math.random() * 2,
+    type: "orbit",
+  }))
     setAllParticles([...floatingParticles, ...glowParticles, ...orbitParticles])
   }, [])
 
@@ -156,8 +156,6 @@ export default function AirPollutionMonitor() {
     },
   ])
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>("default")
-  const [soundEnabled, setSoundEnabled] = useState(true)
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true)
   const [showDataHistory, setShowDataHistory] = useState(false)
   const [showGuide, setShowGuide] = useState(false)
 
@@ -169,125 +167,95 @@ export default function AirPollutionMonitor() {
     { city: "Bulukumba", aqi: 62, status: "Sedang", co: 8.1, co2: 395, temp: 26.9 },
   ])
 
-  const requestNotificationPermission = async () => {
-    if ("Notification" in window) {
-      const permission = await Notification.requestPermission()
-      setNotificationPermission(permission)
-      return permission
-    }
-    return "denied"
-  }
-
-  const playNotificationSound = (type: "warning" | "danger" | "critical") => {
-    if (!soundEnabled) return
-
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
-    const oscillator = audioContext.createOscillator()
-    const gainNode = audioContext.createGain()
-
-    oscillator.connect(gainNode)
-    gainNode.connect(audioContext.destination)
-
-    const frequencies = {
-      warning: 800,
-      danger: 1000,
-      critical: 1200,
-    }
-
-    oscillator.frequency.setValueAtTime(frequencies[type], audioContext.currentTime)
-    oscillator.type = "sine"
-
-    gainNode.gain.setValueAtTime(0, audioContext.currentTime)
-    gainNode.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.1)
-    gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.5)
-
-    oscillator.start(audioContext.currentTime)
-    oscillator.stop(audioContext.currentTime + 0.5)
-  }
-
-  const showNotification = (title: string, message: string, type: "info" | "warning" | "danger" | "critical") => {
-    const notification = {
-      id: Date.now().toString(),
-      type,
-      title,
-      message,
-      timestamp: new Date(),
-      read: false,
-    }
-
-    setNotifications((prev) => [notification, ...prev.slice(0, 9)])
-
-    if (notificationPermission === "granted" && notificationsEnabled) {
-      const browserNotification = new Notification(title, {
-        body: message,
-        icon: "/favicon.ico",
-        badge: "/favicon.ico",
-        tag: "air-quality",
-        requireInteraction: type === "critical",
-      })
-
-      browserNotification.onclick = () => {
-        window.focus()
-        browserNotification.close()
-      }
-
-      if (type !== "critical") {
-        setTimeout(() => browserNotification.close(), 5000)
-      }
-    }
-
-    if (type !== "info") {
-      playNotificationSound(type as "warning" | "danger" | "critical")
-    }
-  }
-
   const checkAirQualityAlerts = (data: SensorData) => {
     const { mq135, mq7 } = data
 
     if (mq135 > 300) {
-      showNotification(
-        "🚨 BAHAYA EKSTREM!",
-        `AQI mencapai ${Math.round(mq135)}! Segera cari tempat berlindung dan gunakan masker N95.`,
-        "critical",
-      )
+      setNotifications((prev) => [
+        {
+          id: Date.now().toString(),
+          type: "critical",
+          title: "🚨 BAHAYA EKSTREM!",
+          message: `AQI mencapai ${Math.round(mq135)}! Segera cari tempat berlindung dan gunakan masker N95.`,
+          timestamp: new Date(),
+          read: false,
+        },
+        ...prev.slice(0, 9),
+      ])
     } else if (mq135 > 200) {
-      showNotification(
-        "⚠️ Sangat Tidak Sehat",
-        `AQI: ${Math.round(mq135)}. Hindari semua aktivitas luar ruangan.`,
-        "danger",
-      )
+      setNotifications((prev) => [
+        {
+          id: Date.now().toString(),
+          type: "danger",
+          title: "⚠️ Sangat Tidak Sehat",
+          message: `AQI: ${Math.round(mq135)}. Hindari semua aktivitas luar ruangan.`,
+          timestamp: new Date(),
+          read: false,
+        },
+        ...prev.slice(0, 9),
+      ])
     } else if (mq135 > 150) {
-      showNotification(
-        "⚠️ Tidak Sehat",
-        `AQI: ${Math.round(mq135)}. Batasi aktivitas luar ruangan dan gunakan masker.`,
-        "danger",
-      )
+      setNotifications((prev) => [
+        {
+          id: Date.now().toString(),
+          type: "danger",
+          title: "⚠️ Tidak Sehat",
+          message: `AQI: ${Math.round(mq135)}. Batasi aktivitas luar ruangan dan gunakan masker.`,
+          timestamp: new Date(),
+          read: false,
+        },
+        ...prev.slice(0, 9),
+      ])
     } else if (mq135 > 100) {
-      showNotification(
-        "⚠️ Tidak Sehat untuk Kelompok Sensitif",
-        `AQI: ${Math.round(mq135)}. Kelompok sensitif sebaiknya mengurangi aktivitas luar ruangan.`,
-        "warning",
-      )
+      setNotifications((prev) => [
+        {
+          id: Date.now().toString(),
+          type: "warning",
+          title: "⚠️ Tidak Sehat untuk Kelompok Sensitif",
+          message: `AQI: ${Math.round(mq135)}. Kelompok sensitif sebaiknya mengurangi aktivitas luar ruangan.`,
+          timestamp: new Date(),
+          read: false,
+        },
+        ...prev.slice(0, 9),
+      ])
     }
 
     if (mq7 > 50) {
-      showNotification(
-        "🚨 BAHAYA CO TINGGI!",
-        `Karbon Monoksida: ${mq7.toFixed(1)} ppm. Segera tinggalkan area dan cari udara segar!`,
-        "critical",
-      )
+      setNotifications((prev) => [
+        {
+          id: Date.now().toString(),
+          type: "critical",
+          title: "🚨 BAHAYA CO TINGGI!",
+          message: `Karbon Monoksida: ${mq7.toFixed(1)} ppm. Segera tinggalkan area dan cari udara segar!`,
+          timestamp: new Date(),
+          read: false,
+        },
+        ...prev.slice(0, 9),
+      ])
     } else if (mq7 > 35) {
-      showNotification(
-        "⚠️ Kadar CO Berbahaya",
-        `CO: ${mq7.toFixed(1)} ppm. Pastikan ventilasi baik dan pertimbangkan meninggalkan area.`,
-        "danger",
-      )
+      setNotifications((prev) => [
+        {
+          id: Date.now().toString(),
+          type: "danger",
+          title: "⚠️ Kadar CO Berbahaya",
+          message: `CO: ${mq7.toFixed(1)} ppm. Pastikan ventilasi baik dan pertimbangkan meninggalkan area.`,
+          timestamp: new Date(),
+          read: false,
+        },
+        ...prev.slice(0, 9),
+      ])
     } else if (mq7 > 15) {
-      showNotification(
-        "⚠️ Kadar CO Tinggi",
-        `CO: ${mq7.toFixed(1)} ppm. Periksa ventilasi ruangan dan sumber CO.`,
-        "warning",
-      )
+      setNotifications((prev) => [
+        {
+      id: Date.now().toString(),
+          type: "warning",
+          title: "⚠️ Kadar CO Tinggi",
+          message: `CO: ${mq7.toFixed(1)} ppm. Periksa ventilasi ruangan dan sumber CO.`,
+      timestamp: new Date(),
+      read: false,
+        },
+        ...prev.slice(0, 9),
+      ])
     }
   }
 
@@ -324,10 +292,6 @@ export default function AirPollutionMonitor() {
       console.error("Error fetching history data:", error)
     }
   }
-
-  useEffect(() => {
-    requestNotificationPermission()
-  }, [])
 
   useEffect(() => {
     checkAirQualityAlerts(currentData)
@@ -413,18 +377,16 @@ export default function AirPollutionMonitor() {
       <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-cyan-200/10 rounded-full blur-3xl"></div>
 
       {/* Floating Particles */}
-      <FloatingParticles />
-
       {/* Navbar */}
       <Navbar
         currentData={currentData}
         isConnected={isConnected}
         lastUpdate={lastUpdate}
         notifications={notifications}
-        soundEnabled={soundEnabled}
-        setSoundEnabled={setSoundEnabled}
-        notificationsEnabled={notificationsEnabled}
-        setNotificationsEnabled={setNotificationsEnabled}
+        soundEnabled={false}
+        setSoundEnabled={() => {}}
+        notificationsEnabled={false}
+        setNotificationsEnabled={() => {}}
         onOpenDataHistory={handleOpenDataHistory}
         onOpenGuide={handleOpenGuide}
         onClearNotifications={handleClearNotifications}
@@ -522,7 +484,7 @@ export default function AirPollutionMonitor() {
         <div className="mb-8 space-y-6">
           {/* Grafik MQ135 (CO2) */}
           <div className="neon-glass p-6 mb-8">
-            <div className="p-6 border-b border-white/20">
+            <div className="p-6">
               <h3 className="text-lg font-semibold text-white flex items-center">
                 <TrendingUp className="h-5 w-5 mr-2" />
                 Grafik CO2 (MQ135)
@@ -555,7 +517,7 @@ export default function AirPollutionMonitor() {
 
           {/* Grafik MQ7 (CO) */}
           <div className="neon-glass p-6 mb-8">
-            <div className="p-6 border-b border-white/20">
+            <div className="p-6">
               <h3 className="text-lg font-semibold text-white flex items-center">
                 <TrendingUp className="h-5 w-5 mr-2" />
                 Grafik CO (MQ7)
@@ -580,7 +542,7 @@ export default function AirPollutionMonitor() {
 
           {/* Grafik Mingguan Gabungan CO2 & CO */}
           <div className="neon-glass p-6 mb-8">
-            <div className="p-6 border-b border-white/20">
+            <div className="p-6">
               <h3 className="text-lg font-semibold text-white flex items-center">
                 <TrendingUp className="h-5 w-5 mr-2" />
                 Grafik Mingguan Gabungan CO2 & CO
@@ -606,7 +568,7 @@ export default function AirPollutionMonitor() {
 
           {/* Sulawesi Selatan Air Quality Section - moved here */}
           <div className="neon-glass p-6">
-            <div className="p-6 border-b border-white/20">
+            <div className="p-6">
               <h3 className="text-lg font-semibold text-white flex items-center">
                 <MapPin className="h-5 w-5 mr-2" />
                 Kualitas Udara Sulawesi Selatan
@@ -726,7 +688,7 @@ export default function AirPollutionMonitor() {
       {showGuide && <AirQualityGuide />}
 
       {/* Footer */}
-      <footer className="relative z-10 neon-glass border-t border-white/20 mt-12">
+      <footer className="relative z-10 neon-glass mt-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
@@ -754,7 +716,7 @@ export default function AirPollutionMonitor() {
               </p>
             </div>
           </div>
-          <div className="border-t border-white/20 pt-6 mt-6">
+          <div className="pt-6 mt-6">
             <p className="text-center text-sm text-white/70">
               © 2024 Monitor Udara. Andi Ahmad Fadhil Azhary. Prodi Pendidikan Vokasional Mekatronika
             </p>

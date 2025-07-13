@@ -1,5 +1,6 @@
 "use client"
 
+import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -10,16 +11,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Switch } from "@/components/ui/switch"
 import { DataLogger } from "@/components/data-logger"
 import {
   Bell,
   Settings,
-  Wifi,
-  WifiOff,
-  Volume2,
-  VolumeX,
-  History,
   BookOpen,
   Trash2,
   AlertTriangle,
@@ -75,6 +70,7 @@ export function Navbar({
 }: NavbarProps) {
   const [showNotifications, setShowNotifications] = useState(false)
   const unreadCount = notifications.filter((n) => !n.read).length
+  const router = useRouter()
 
   const getNotificationIcon = (type: Notification["type"]) => {
     switch (type) {
@@ -109,7 +105,6 @@ export function Navbar({
           {/* Logo and Title */}
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-3">
-              {/* Logo AM dihapus */}
               <div>
                 <h1 className="text-xl font-bold text-white">Monitor Udara</h1>
                 <p className="text-xs text-white/70">Real-time Air Quality Monitoring</p>
@@ -118,15 +113,7 @@ export function Navbar({
           </div>
 
           {/* Status and Controls */}
-          <div className="flex items-center space-x-4">
-            {/* Connection Status */}
-            {/* Dihapus: Status Koneksi */}
-
-            {/* Last Update */}
-            {/* Dihapus: Update Terakhir */}
-
-            {/* Data Logger dipindahkan ke menu Setting */}
-
+          <div className="flex items-center gap-2 md:gap-4 ml-auto">
             {/* Notifications */}
             <DropdownMenu open={showNotifications} onOpenChange={setShowNotifications}>
               <DropdownMenuTrigger asChild>
@@ -195,62 +182,22 @@ export function Navbar({
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* Settings */}
+            {/* Settings Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30"
-                >
-                  <Settings className="h-4 w-4" />
-                </Button>
+                <button className="rounded-full border-2 border-white/30 w-10 h-10 flex items-center justify-center bg-white/10 hover:bg-white/20 transition ml-2">
+                  <Settings className="h-5 w-5 text-white/70" />
+                </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-64 bg-white/10 backdrop-blur-md border-white/20 text-white">
                 <div className="p-3 border-b border-white/20">
                   <h3 className="font-semibold">Pengaturan</h3>
                 </div>
 
-                {/* Sound Settings */}
-                <div className="p-3 border-b border-white/10">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      {soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
-                      <span className="text-sm">Suara Notifikasi</span>
-                    </div>
-                    <Switch checked={soundEnabled} onCheckedChange={setSoundEnabled} />
-                  </div>
-                </div>
-
-                {/* Notification Settings */}
-                <div className="p-3 border-b border-white/10">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Bell className="h-4 w-4" />
-                      <span className="text-sm">Notifikasi Browser</span>
-                    </div>
-                    <Switch checked={notificationsEnabled} onCheckedChange={setNotificationsEnabled} />
-                  </div>
-                </div>
+                {/* Data Logger */}
+                <DataLogger />
 
                 <DropdownMenuSeparator className="bg-white/20" />
-
-                {/* Data Logger dipindahkan ke sini */}
-                <div className="p-3 border-b border-white/10">
-                  <DataLogger />
-                </div>
-
-                {/* Menu Items */}
-                {/* Hapus Riwayat Data */}
-                {/*
-                <DropdownMenuItem
-                  onClick={onOpenDataHistory}
-                  className="flex items-center space-x-2 text-white hover:bg-white/10 focus:bg-white/10"
-                >
-                  <History className="h-4 w-4" />
-                  <span>Riwayat Data</span>
-                </DropdownMenuItem>
-                */}
 
                 <DropdownMenuItem
                   onClick={onOpenGuide}

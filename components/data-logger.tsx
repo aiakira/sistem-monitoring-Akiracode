@@ -237,10 +237,10 @@ export function DataLogger({ onNewData }: DataLoggerProps) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30 transition-all duration-300">
+        <button className="flex items-center gap-2 px-4 py-2 text-white text-base font-medium bg-transparent border-0 shadow-none hover:bg-white/10 focus:outline-none">
           <Database className="h-4 w-4 mr-2" />
           Data Logger
-        </Button>
+        </button>
       </DialogTrigger>
       <DialogContent className="backdrop-blur-md bg-white/10 border border-white/20 text-white max-w-6xl max-h-[90vh] overflow-hidden">
         <DialogHeader>
@@ -331,23 +331,23 @@ export function DataLogger({ onNewData }: DataLoggerProps) {
 
           {/* Statistics */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+            <div className="neon-glass p-3 border-0">
               <div className="text-2xl font-bold text-white">{filteredRecords.length}</div>
               <div className="text-xs text-white/70">Total Records</div>
             </div>
-            <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+            <div className="neon-glass p-3">
               <div className="text-2xl font-bold text-green-400">
                 {filteredRecords.filter((r) => r.status === "normal").length}
               </div>
               <div className="text-xs text-white/70">Normal</div>
             </div>
-            <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+            <div className="neon-glass p-3">
               <div className="text-2xl font-bold text-yellow-400">
                 {filteredRecords.filter((r) => r.status === "warning").length}
               </div>
               <div className="text-xs text-white/70">Warning</div>
             </div>
-            <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+            <div className="neon-glass p-3">
               <div className="text-2xl font-bold text-red-400">
                 {filteredRecords.filter((r) => r.status === "critical" || r.status === "danger").length}
               </div>
@@ -356,7 +356,7 @@ export function DataLogger({ onNewData }: DataLoggerProps) {
           </div>
 
           {/* Data Table */}
-          <div className="bg-white/5 rounded-lg border border-white/10 overflow-hidden">
+          <div className="neon-glass overflow-hidden border-0">
             <div className="max-h-96 overflow-y-auto">
               <Table>
                 <TableHeader>

@@ -47,7 +47,7 @@ export function InteractiveBarChart({ data }: InteractiveBarChartProps) {
   const currentConfig = metricConfig[selectedMetric as keyof typeof metricConfig]
 
   return (
-    <div className="backdrop-blur-md bg-white/10 border border-white/20 rounded-xl shadow-lg overflow-hidden">
+    <div className="neon-glass shadow-lg overflow-hidden border-0">
       <div className="p-6 border-b border-white/20">
         <div className="flex items-center justify-between">
           <div>
