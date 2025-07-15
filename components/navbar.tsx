@@ -20,7 +20,9 @@ import {
   AlertTriangle,
   Info,
   XCircle,
+  CheckCircle,
 } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 interface SensorData {
   temperature: number
@@ -69,6 +71,7 @@ export function Navbar({
   onMarkNotificationRead,
 }: NavbarProps) {
   const [showNotifications, setShowNotifications] = useState(false)
+  const [showGuideModal, setShowGuideModal] = useState(false)
   const unreadCount = notifications.filter((n) => !n.read).length
   const router = useRouter()
 
@@ -99,118 +102,104 @@ export function Navbar({
   }
 
   return (
-    <nav className="relative z-20 backdrop-blur-md bg-white/10 border-b border-white/20 shadow-lg neon-glass">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo and Title */}
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-3">
-              <div>
-                <h1 className="text-xl font-bold text-white">Monitor Udara</h1>
-                <p className="text-xs text-white/70">Real-time Air Quality Monitoring</p>
+    <>
+      <nav className="relative z-20 backdrop-blur-md bg-white/10 border-b border-white/20 shadow-lg neon-glass">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo and Title */}
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-3">
+                <div>
+                  <h1 className="text-xl font-bold text-white">Monitor Udara</h1>
+                  <p className="text-xs text-white/70">Real-time Air Quality Monitoring</p>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Status and Controls */}
-          <div className="flex items-center gap-2 md:gap-4 ml-auto">
-            {/* Notifications */}
-            <DropdownMenu open={showNotifications} onOpenChange={setShowNotifications}>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="relative bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30"
-                >
-                  <Bell className="h-4 w-4" />
-                  {unreadCount > 0 && (
-                    <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 text-xs bg-red-500 text-white border-0">
-                      {unreadCount > 9 ? "9+" : unreadCount}
-                    </Badge>
-                  )}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="w-80 max-h-96 overflow-y-auto bg-white/10 backdrop-blur-md border-white/20 text-white"
-              >
-                <div className="p-3 border-b border-white/20">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold">Notifikasi</h3>
-                    {notifications.length > 0 && (
-                      <Button
-                        onClick={onClearNotifications}
-                        size="sm"
-                        variant="ghost"
-                        className="h-6 px-2 text-xs text-white/70 hover:text-white"
-                      >
-                        <Trash2 className="h-3 w-3 mr-1" />
-                        Hapus Semua
-                      </Button>
+            {/* Status and Controls */}
+            <div className="flex items-center gap-2 md:gap-4 ml-auto">
+              {/* Notifications */}
+              <DropdownMenu open={showNotifications} onOpenChange={setShowNotifications}>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="relative bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30"
+                  >
+                    <Bell className="h-4 w-4" />
+                    {unreadCount > 0 && (
+                      <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 text-xs bg-red-500 text-white border-0">
+                        {unreadCount > 9 ? "9+" : unreadCount}
+                      </Badge>
                     )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="w-80 max-h-96 overflow-y-auto bg-white/10 backdrop-blur-md border-white/20 text-white"
+                >
+                  <div className="p-3 border-b border-white/20">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-semibold">Notifikasi</h3>
+                      {notifications.length > 0 && (
+                        <Button
+                          onClick={onClearNotifications}
+                          size="sm"
+                          variant="ghost"
+                          className="h-6 px-2 text-xs text-white/70 hover:text-white"
+                        >
+                          <Trash2 className="h-3 w-3 mr-1" />
+                          Hapus Semua
+                        </Button>
+                      )}
+                    </div>
                   </div>
-                </div>
-                <div className="max-h-64 overflow-y-auto">
-                  {notifications.length === 0 ? (
-                    <div className="p-4 text-center text-white/70 text-sm">Tidak ada notifikasi</div>
-                  ) : (
-                    notifications.map((notification) => (
-                      <div
-                        key={notification.id}
-                        className={`p-3 border-b border-white/10 hover:bg-white/5 cursor-pointer ${
-                          !notification.read ? "bg-white/5" : ""
-                        }`}
-                        onClick={() => onMarkNotificationRead(notification.id)}
-                      >
-                        <div className="flex items-start space-x-3">
-                          {getNotificationIcon(notification.type)}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between">
-                              <p className="text-sm font-medium text-white truncate">{notification.title}</p>
-                              {!notification.read && <div className="w-2 h-2 bg-blue-400 rounded-full"></div>}
+                  <div className="max-h-64 overflow-y-auto">
+                    {notifications.length === 0 ? (
+                      <div className="p-4 text-center text-white/70 text-sm">Tidak ada notifikasi</div>
+                    ) : (
+                      notifications.map((notification) => (
+                        <div
+                          key={notification.id}
+                          className={`p-3 border-b border-white/10 hover:bg-white/5 cursor-pointer ${
+                            !notification.read ? "bg-white/5" : ""
+                          }`}
+                          onClick={() => onMarkNotificationRead(notification.id)}
+                        >
+                          <div className="flex items-start space-x-3">
+                            {getNotificationIcon(notification.type)}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between">
+                                <p className="text-sm font-medium text-white truncate">{notification.title}</p>
+                                {!notification.read && <div className="w-2 h-2 bg-blue-400 rounded-full"></div>}
+                              </div>
+                              <p className="text-xs text-white/70 mt-1">{notification.message}</p>
+                              <p className="text-xs text-white/50 mt-1">
+                                {formatNotificationTime(notification.timestamp)}
+                              </p>
                             </div>
-                            <p className="text-xs text-white/70 mt-1">{notification.message}</p>
-                            <p className="text-xs text-white/50 mt-1">
-                              {formatNotificationTime(notification.timestamp)}
-                            </p>
                           </div>
                         </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                      ))
+                    )}
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-            {/* Settings Menu */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="rounded-full border-2 border-white/30 w-10 h-10 flex items-center justify-center bg-white/10 hover:bg-white/20 transition ml-2">
-                  <Settings className="h-5 w-5 text-white/70" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-64 bg-white/10 backdrop-blur-md border-white/20 text-white">
-                <div className="p-3 border-b border-white/20">
-                  <h3 className="font-semibold">Pengaturan</h3>
-                </div>
-
-                {/* Data Logger */}
-                <DataLogger />
-
-                <DropdownMenuSeparator className="bg-white/20" />
-
-                <DropdownMenuItem
-                  onClick={onOpenGuide}
-                  className="flex items-center space-x-2 text-white hover:bg-white/10 focus:bg-white/10"
-                >
-                  <BookOpen className="h-4 w-4" />
-                  <span>Panduan Kualitas Udara</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+              {/* Hapus tombol Data Logger di sini */}
+              {/* <Button
+                variant="ghost"
+                size="sm"
+                className="bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30"
+                onClick={onOpenDataHistory}
+              >
+                <BookOpen className="h-4 w-4 mr-2" />
+                Data Logger
+              </Button> */}
+            </div>
           </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+    </>
   )
 }

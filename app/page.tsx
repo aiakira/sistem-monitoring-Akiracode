@@ -1,12 +1,13 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Thermometer, Droplets, Activity, AlertTriangle, CheckCircle, TrendingUp, MapPin } from "lucide-react"
+import { Thermometer, Droplets, Activity, AlertTriangle, CheckCircle, TrendingUp, MapPin, Clock } from "lucide-react"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { InteractiveBarChart } from "@/components/interactive-bar-chart"
 import { DataHistory } from "@/components/data-history"
-import { AirQualityGuide } from "@/components/air-quality-guide"
+import { AirQualityGuide } from "@/components/panduan-kualitas udara"
+import { DataLogger } from "@/components/data-logger"
 import { Navbar } from "@/components/navbar"
 
 interface SensorData {
@@ -158,6 +159,8 @@ export default function AirPollutionMonitor() {
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>("default")
   const [showDataHistory, setShowDataHistory] = useState(false)
   const [showGuide, setShowGuide] = useState(false)
+  const [soundEnabled, setSoundEnabled] = useState(true)
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true)
 
   const [sulselAirQuality, setSulselAirQuality] = useState([
     { city: "Makassar", aqi: 85, status: "Sedang", co: 12.5, co2: 480, temp: 28.5 },
@@ -173,7 +176,7 @@ export default function AirPollutionMonitor() {
     if (mq135 > 300) {
       setNotifications((prev) => [
         {
-          id: Date.now().toString(),
+          id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           type: "critical",
           title: "🚨 BAHAYA EKSTREM!",
           message: `AQI mencapai ${Math.round(mq135)}! Segera cari tempat berlindung dan gunakan masker N95.`,
@@ -185,7 +188,7 @@ export default function AirPollutionMonitor() {
     } else if (mq135 > 200) {
       setNotifications((prev) => [
         {
-          id: Date.now().toString(),
+          id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           type: "danger",
           title: "⚠️ Sangat Tidak Sehat",
           message: `AQI: ${Math.round(mq135)}. Hindari semua aktivitas luar ruangan.`,
@@ -197,7 +200,7 @@ export default function AirPollutionMonitor() {
     } else if (mq135 > 150) {
       setNotifications((prev) => [
         {
-          id: Date.now().toString(),
+          id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           type: "danger",
           title: "⚠️ Tidak Sehat",
           message: `AQI: ${Math.round(mq135)}. Batasi aktivitas luar ruangan dan gunakan masker.`,
@@ -209,7 +212,7 @@ export default function AirPollutionMonitor() {
     } else if (mq135 > 100) {
       setNotifications((prev) => [
         {
-          id: Date.now().toString(),
+          id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           type: "warning",
           title: "⚠️ Tidak Sehat untuk Kelompok Sensitif",
           message: `AQI: ${Math.round(mq135)}. Kelompok sensitif sebaiknya mengurangi aktivitas luar ruangan.`,
@@ -223,7 +226,7 @@ export default function AirPollutionMonitor() {
     if (mq7 > 50) {
       setNotifications((prev) => [
         {
-          id: Date.now().toString(),
+          id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           type: "critical",
           title: "🚨 BAHAYA CO TINGGI!",
           message: `Karbon Monoksida: ${mq7.toFixed(1)} ppm. Segera tinggalkan area dan cari udara segar!`,
@@ -235,7 +238,7 @@ export default function AirPollutionMonitor() {
     } else if (mq7 > 35) {
       setNotifications((prev) => [
         {
-          id: Date.now().toString(),
+          id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           type: "danger",
           title: "⚠️ Kadar CO Berbahaya",
           message: `CO: ${mq7.toFixed(1)} ppm. Pastikan ventilasi baik dan pertimbangkan meninggalkan area.`,
@@ -247,7 +250,7 @@ export default function AirPollutionMonitor() {
     } else if (mq7 > 15) {
       setNotifications((prev) => [
         {
-      id: Date.now().toString(),
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           type: "warning",
           title: "⚠️ Kadar CO Tinggi",
           message: `CO: ${mq7.toFixed(1)} ppm. Periksa ventilasi ruangan dan sumber CO.`,
@@ -281,7 +284,7 @@ export default function AirPollutionMonitor() {
 
   const fetchHistoryData = async () => {
     try {
-      const response = await fetch("/api/sensor-history")
+      const response = await fetch("/api/sensor-chart")
       if (response.ok) {
         const result = await response.json()
         if (result.data) {
@@ -289,7 +292,7 @@ export default function AirPollutionMonitor() {
         }
       }
     } catch (error) {
-      console.error("Error fetching history data:", error)
+      console.error("Error fetching chart data:", error)
     }
   }
 
@@ -370,6 +373,21 @@ export default function AirPollutionMonitor() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-400 via-blue-500 to-cyan-600 relative overflow-hidden">
+      {/* Navbar/Header */}
+      <Navbar
+        currentData={currentData}
+        isConnected={isConnected}
+        lastUpdate={lastUpdate}
+        notifications={notifications}
+        soundEnabled={soundEnabled}
+        setSoundEnabled={setSoundEnabled}
+        notificationsEnabled={notificationsEnabled}
+        setNotificationsEnabled={setNotificationsEnabled}
+        onOpenDataHistory={handleOpenDataHistory}
+        onOpenGuide={handleOpenGuide}
+        onClearNotifications={handleClearNotifications}
+        onMarkNotificationRead={handleMarkNotificationRead}
+      />
       {/* Background Elements */}
       <div className="absolute inset-0 bg-gradient-to-br from-sky-500/20 via-blue-600/20 to-cyan-600/20"></div>
       <div className="absolute top-0 left-0 w-72 h-72 bg-sky-200/10 rounded-full blur-3xl"></div>
@@ -377,22 +395,7 @@ export default function AirPollutionMonitor() {
       <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-cyan-200/10 rounded-full blur-3xl"></div>
 
       {/* Floating Particles */}
-      {/* Navbar */}
-      <Navbar
-        currentData={currentData}
-        isConnected={isConnected}
-        lastUpdate={lastUpdate}
-        notifications={notifications}
-        soundEnabled={false}
-        setSoundEnabled={() => {}}
-        notificationsEnabled={false}
-        setNotificationsEnabled={() => {}}
-        onOpenDataHistory={handleOpenDataHistory}
-        onOpenGuide={handleOpenGuide}
-        onClearNotifications={handleClearNotifications}
-        onMarkNotificationRead={handleMarkNotificationRead}
-      />
-
+      <FloatingParticles />
       {/* Main Content */}
       <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Status Alert */}
@@ -565,7 +568,11 @@ export default function AirPollutionMonitor() {
               </div>
             </div>
           </div>
-
+          {/* Data Logger */}
+          <DataLogger />
+          <div className="neon-glass p-6 mb-8">
+            <AirQualityGuide />
+          </div>
           {/* Sulawesi Selatan Air Quality Section - moved here */}
           <div className="neon-glass p-6">
             <div className="p-6">
@@ -610,77 +617,7 @@ export default function AirPollutionMonitor() {
         </div>
 
         {/* Info Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="neon-glass p-6">
-            <div className="flex items-center mb-4">
-              <CheckCircle className="h-5 w-5 mr-2 text-emerald-300" />
-              <h3 className="text-lg font-semibold text-white">Panduan Kualitas Udara</h3>
-            </div>
-            <div className="space-y-3">
-              <div className="flex items-center space-x-3">
-                <div className="w-4 h-4 neon-dot rounded-full shadow-lg"></div>
-                <span className="text-white/90 text-sm">
-                  <strong>0-50:</strong> Baik - Aman untuk semua aktivitas
-                </span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-4 h-4 neon-dot rounded-full shadow-lg"></div>
-                <span className="text-white/90 text-sm">
-                  <strong>51-100:</strong> Sedang - Dapat diterima untuk kebanyakan orang
-                </span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-4 h-4 neon-dot rounded-full shadow-lg"></div>
-                <span className="text-white/90 text-sm">
-                  <strong>101-150:</strong> Tidak sehat untuk kelompok sensitif
-                </span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-4 h-4 neon-dot rounded-full shadow-lg"></div>
-                <span className="text-white/90 text-sm">
-                  <strong>151+:</strong> Tidak sehat - Hindari aktivitas luar ruangan
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="neon-glass p-6">
-            <div className="flex items-center mb-4">
-              <AlertTriangle className="h-5 w-5 mr-2 text-amber-300" />
-              <h3 className="text-lg font-semibold text-white">Rekomendasi</h3>
-            </div>
-            <div className="space-y-2 text-sm text-white/90">
-              {currentData.mq135 <= 50 && (
-                <p className="flex items-start space-x-2">
-                  <span className="text-emerald-300 mt-0.5">✓</span>
-                  <span>Kualitas udara baik, aman untuk semua aktivitas luar ruangan.</span>
-                </p>
-              )}
-              {currentData.mq135 > 50 && currentData.mq135 <= 100 && (
-                <p className="flex items-start space-x-2">
-                  <span className="text-amber-300 mt-0.5">⚠</span>
-                  <span>
-                    Kualitas udara sedang, kelompok sensitif sebaiknya membatasi aktivitas luar ruangan yang lama.
-                  </span>
-                </p>
-              )}
-              {currentData.mq135 > 100 && (
-                <p className="flex items-start space-x-2">
-                  <span className="text-red-300 mt-0.5">⚠</span>
-                  <span>
-                    Kualitas udara tidak sehat, disarankan menggunakan masker dan mengurangi aktivitas luar ruangan.
-                  </span>
-                </p>
-              )}
-              {currentData.mq7 > 9 && (
-                <p className="flex items-start space-x-2">
-                  <span className="text-red-300 mt-0.5">⚠</span>
-                  <span>Kadar CO tinggi, pastikan ventilasi ruangan baik.</span>
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
+        {/* Removed Rekomendasi section */}
       </main>
 
       {/* Modals */}

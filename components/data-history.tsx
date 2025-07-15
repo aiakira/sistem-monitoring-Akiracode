@@ -269,7 +269,7 @@ export function DataHistory() {
                 className="bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30"
                 size="sm"
               >
-                <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`} />
+                <RefreshCw className="h-4 w-4 mr-2" />
                 Refresh
               </Button>
               <Button

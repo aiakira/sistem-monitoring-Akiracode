@@ -1,32 +1,60 @@
- import { db } from "@vercel/postgres"
+import { db } from "@vercel/postgres"
 import { NextResponse } from "next/server"
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const { rows } = await db.sql`
-      SELECT temperature, humidity, mq135, mq7, created_at
-      FROM sensor_readings 
-      ORDER BY created_at DESC 
-      LIMIT 20;
-    `
+    const { searchParams } = new URL(request.url)
+    const interval = searchParams.get('interval') || 'daily' // 'daily' atau '10min'
+
+    let query
+    if (interval === '10min') {
+      // Data untuk grafik dengan interval 10 menit
+      query = `
+        SELECT
+          DATE_TRUNC('hour', created_at) + 
+          INTERVAL '10 min' * (EXTRACT(MINUTE FROM created_at)::int / 10) as time_interval,
+          AVG(temperature) as temperature,
+          AVG(humidity) as humidity,
+          AVG(mq135) as mq135,
+          AVG(mq7) as mq7
+        FROM sensor_readings
+        WHERE created_at >= NOW() - INTERVAL '7 days'
+        GROUP BY time_interval
+        ORDER BY time_interval DESC
+        LIMIT 100;
+      `
+    } else {
+      // Data rata-rata harian (default)
+      query = `
+        SELECT
+          DATE(created_at) as date,
+          AVG(temperature) as temperature,
+          AVG(humidity) as humidity,
+          AVG(mq135) as mq135,
+          AVG(mq7) as mq7
+        FROM sensor_readings
+        GROUP BY DATE(created_at)
+        ORDER BY date DESC;
+      `
+    }
+
+    const { rows } = await db.sql`${query}`
 
     const historyData = rows
       .map((row) => ({
-        time: new Date(row.created_at).toLocaleTimeString("id-ID", {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
+        time: interval === '10min' ? row.time_interval : row.date,
         mq135: Number(row.mq135),
         mq7: Number(row.mq7),
         temperature: Number(row.temperature),
         humidity: Number(row.humidity),
-        timestamp: row.created_at,
+        timestamp: interval === '10min' ? row.time_interval : row.date,
       }))
       .reverse()
 
     return NextResponse.json(
       {
         data: historyData,
+        interval: interval,
       },
       { status: 200 },
     )

@@ -1,20 +1,10 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import {
-  Database,
   Search,
   Download,
   Filter,
@@ -28,6 +18,7 @@ import {
   AlertCircle,
   CheckCircle,
   XCircle,
+  Database,
 } from "lucide-react"
 
 interface DataRecord {
@@ -235,317 +226,172 @@ export function DataLogger({ onNewData }: DataLoggerProps) {
   }
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <button className="flex items-center gap-2 px-4 py-2 text-white text-base font-medium bg-transparent border-0 shadow-none hover:bg-white/10 focus:outline-none">
-          <Database className="h-4 w-4 mr-2" />
-          Data Logger
-        </button>
-      </DialogTrigger>
-      <DialogContent className="backdrop-blur-md bg-white/10 border border-white/20 text-white max-w-6xl max-h-[90vh] overflow-hidden">
-        <DialogHeader>
-          <DialogTitle className="flex items-center space-x-2">
-            <Database className="h-5 w-5" />
-            <span>Pencatatan Data Polusi Udara</span>
-          </DialogTitle>
-          <DialogDescription className="text-white/70">
-            Kelola dan analisis semua data monitoring polusi udara yang telah tercatat
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-4">
-          {/* Controls */}
-          <div className="flex flex-wrap gap-4 items-center justify-between">
-            <div className="flex flex-wrap gap-2">
-              {/* Search */}
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/50" />
-                <Input
-                  placeholder="Cari data..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/50 w-64"
-                />
-              </div>
-
-              {/* Status Filter */}
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-40 bg-white/10 border-white/20 text-white">
-                  <Filter className="h-4 w-4 mr-2" />
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-white/10 backdrop-blur-md border-white/20">
-                  <SelectItem value="all">Semua Status</SelectItem>
-                  <SelectItem value="normal">Normal</SelectItem>
-                  <SelectItem value="warning">Warning</SelectItem>
-                  <SelectItem value="danger">Danger</SelectItem>
-                  <SelectItem value="critical">Critical</SelectItem>
-                </SelectContent>
-              </Select>
-
-              {/* Date Filter */}
-              <Select value={dateFilter} onValueChange={setDateFilter}>
-                <SelectTrigger className="w-40 bg-white/10 border-white/20 text-white">
-                  <Calendar className="h-4 w-4 mr-2" />
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-white/10 backdrop-blur-md border-white/20">
-                  <SelectItem value="all">Semua Waktu</SelectItem>
-                  <SelectItem value="today">Hari Ini</SelectItem>
-                  <SelectItem value="week">7 Hari</SelectItem>
-                  <SelectItem value="month">30 Hari</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex gap-2">
-              <Button
-                onClick={refreshData}
-                disabled={isLoading}
-                className="bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30"
-                size="sm"
-              >
-                <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`} />
-                Refresh
-              </Button>
-              <Button
-                onClick={() => exportData("csv")}
-                disabled={isLoading}
-                className="bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30"
-                size="sm"
-              >
-                <Download className="h-4 w-4 mr-2" />
-                CSV
-              </Button>
-              <Button
-                onClick={() => exportData("json")}
-                disabled={isLoading}
-                className="bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30"
-                size="sm"
-              >
-                <FileText className="h-4 w-4 mr-2" />
-                JSON
-              </Button>
-            </div>
-          </div>
-
-          {/* Statistics */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="neon-glass p-3 border-0">
-              <div className="text-2xl font-bold text-white">{filteredRecords.length}</div>
-              <div className="text-xs text-white/70">Total Records</div>
-            </div>
-            <div className="neon-glass p-3">
-              <div className="text-2xl font-bold text-green-400">
-                {filteredRecords.filter((r) => r.status === "normal").length}
-              </div>
-              <div className="text-xs text-white/70">Normal</div>
-            </div>
-            <div className="neon-glass p-3">
-              <div className="text-2xl font-bold text-yellow-400">
-                {filteredRecords.filter((r) => r.status === "warning").length}
-              </div>
-              <div className="text-xs text-white/70">Warning</div>
-            </div>
-            <div className="neon-glass p-3">
-              <div className="text-2xl font-bold text-red-400">
-                {filteredRecords.filter((r) => r.status === "critical" || r.status === "danger").length}
-              </div>
-              <div className="text-xs text-white/70">Critical/Danger</div>
-            </div>
-          </div>
-
-          {/* Data Table */}
-          <div className="neon-glass overflow-hidden border-0">
-            <div className="max-h-96 overflow-y-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-white/10 hover:bg-white/5">
-                    <TableHead className="text-white/90">ID</TableHead>
-                    <TableHead className="text-white/90">Waktu</TableHead>
-                    <TableHead className="text-white/90">AQI</TableHead>
-                    <TableHead className="text-white/90">CO (ppm)</TableHead>
-                    <TableHead className="text-white/90">Suhu (°C)</TableHead>
-                    <TableHead className="text-white/90">Kelembapan (%)</TableHead>
-                    <TableHead className="text-white/90">Status</TableHead>
-                    <TableHead className="text-white/90">Sumber</TableHead>
-                    <TableHead className="text-white/90">Aksi</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {currentRecords.map((record) => (
-                    <TableRow key={record.id} className="border-white/10 hover:bg-white/5">
-                      <TableCell className="text-white/80 font-mono text-xs">{record.id.slice(-8)}</TableCell>
-                      <TableCell className="text-white/80">
-                        <div className="flex flex-col">
-                          <span className="text-xs">{record.timestamp.toLocaleDateString("id-ID")}</span>
-                          <span className="text-xs text-white/60">{record.timestamp.toLocaleTimeString("id-ID")}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-white/80 font-semibold">{record.aqi}</TableCell>
-                      <TableCell className="text-white/80">{record.co}</TableCell>
-                      <TableCell className="text-white/80">{record.temperature}</TableCell>
-                      <TableCell className="text-white/80">{record.humidity}</TableCell>
-                      <TableCell>
-                        <div
-                          className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs border ${getStatusColor(record.status)}`}
-                        >
-                          {getStatusIcon(record.status)}
-                          <span className="capitalize">{record.status}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-white/80">
-                        <span className="capitalize text-xs bg-white/10 px-2 py-1 rounded">{record.source}</span>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex space-x-1">
-                          <Button
-                            onClick={() => setSelectedRecord(record)}
-                            size="sm"
-                            className="h-8 w-8 p-0 bg-white/10 hover:bg-white/20 border-white/20"
-                          >
-                            <Eye className="h-3 w-3" />
-                          </Button>
-                          <Button
-                            onClick={() => deleteRecord(record.id)}
-                            size="sm"
-                            className="h-8 w-8 p-0 bg-red-500/20 hover:bg-red-500/30 border-red-500/30"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </div>
-
-          {/* Pagination */}
-          <div className="flex items-center justify-between">
-            <div className="text-sm text-white/70">
-              Menampilkan {indexOfFirstRecord + 1}-{Math.min(indexOfLastRecord, filteredRecords.length)} dari{" "}
-              {filteredRecords.length} data
-            </div>
-            <div className="flex space-x-2">
-              <Button
-                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-                size="sm"
-                className="bg-white/10 hover:bg-white/20 border-white/20 text-white disabled:opacity-50"
-              >
-                Previous
-              </Button>
-              <span className="flex items-center px-3 py-1 text-sm text-white/80">
-                {currentPage} / {totalPages}
-              </span>
-              <Button
-                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                disabled={currentPage === totalPages}
-                size="sm"
-                className="bg-white/10 hover:bg-white/20 border-white/20 text-white disabled:opacity-50"
-              >
-                Next
-              </Button>
-            </div>
-          </div>
+    <div className="neon-glass p-6 mb-8">
+      {/* Header judul dan deskripsi */}
+      <div className="mb-6">
+        <div className="flex items-center gap-3 mb-1">
+          <Database className="h-7 w-7 text-white" />
+          <h2 className="text-2xl font-bold text-white">Pencatatan Data Polusi Udara</h2>
         </div>
+        <p className="text-white/70 text-base">
+          Kelola dan analisis semua data monitoring polusi udara yang telah tercatat
+        </p>
+      </div>
+      <div className="flex flex-wrap gap-4 items-center justify-between mb-4">
+        <div className="flex flex-wrap gap-2">
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/50" />
+            <Input
+              placeholder="Cari data..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/50 w-64"
+            />
+          </div>
+          {/* Status Filter */}
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-40 bg-white/10 border-white/20 text-white">
+              <Filter className="h-4 w-4 mr-2" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-white/10 backdrop-blur-md border-white/20">
+              <SelectItem value="all">Semua Status</SelectItem>
+              <SelectItem value="normal">Normal</SelectItem>
+              <SelectItem value="warning">Warning</SelectItem>
+              <SelectItem value="danger">Danger</SelectItem>
+              <SelectItem value="critical">Critical</SelectItem>
+            </SelectContent>
+          </Select>
+          {/* Date Filter */}
+          <Select value={dateFilter} onValueChange={setDateFilter}>
+            <SelectTrigger className="w-40 bg-white/10 border-white/20 text-white">
+              <Calendar className="h-4 w-4 mr-2" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-white/10 backdrop-blur-md border-white/20">
+              <SelectItem value="all">Semua Waktu</SelectItem>
+              <SelectItem value="today">Hari Ini</SelectItem>
+              <SelectItem value="week">7 Hari</SelectItem>
+              <SelectItem value="month">30 Hari</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={refreshData}
+            disabled={isLoading}
+            className="bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30 px-4 py-2 rounded"
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`} />
+            Refresh
+          </button>
+          <button
+            onClick={() => exportData("csv")}
+            disabled={isLoading}
+            className="bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30 px-4 py-2 rounded"
+          >
+            <Download className="h-4 w-4 mr-2" />
+            CSV
+          </button>
+          <button
+            onClick={() => exportData("json")}
+            disabled={isLoading}
+            className="bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30 px-4 py-2 rounded"
+          >
+            <FileText className="h-4 w-4 mr-2" />
+            JSON
+          </button>
+        </div>
+      </div>
+      <div className="max-h-96 overflow-y-auto">
+        <Table>
+          <TableHeader>
+            <TableRow className="border-white/10 hover:bg-white/5">
+              <TableHead className="text-white/90">ID</TableHead>
+              <TableHead className="text-white/90">Waktu</TableHead>
+              <TableHead className="text-white/90">AQI</TableHead>
+              <TableHead className="text-white/90">CO (ppm)</TableHead>
+              <TableHead className="text-white/90">Suhu (°C)</TableHead>
+              <TableHead className="text-white/90">Kelembapan (%)</TableHead>
+              <TableHead className="text-white/90">Status</TableHead>
+              <TableHead className="text-white/90">Sumber</TableHead>
+              <TableHead className="text-white/90">Aksi</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {currentRecords.map((record) => (
+              <TableRow key={record.id} className="border-white/10 hover:bg-white/5">
+                <TableCell className="text-white/80 font-mono text-xs">{record.id.slice(-8)}</TableCell>
+                <TableCell className="text-white/80">
+                  <div className="flex flex-col">
+                    <span className="text-xs">{record.timestamp.toLocaleDateString("id-ID")}</span>
+                    <span className="text-xs text-white/60">{record.timestamp.toLocaleTimeString("id-ID")}</span>
+                  </div>
+                </TableCell>
+                <TableCell className="text-white/80 font-semibold">{record.aqi}</TableCell>
+                <TableCell className="text-white/80">{record.co}</TableCell>
+                <TableCell className="text-white/80">{record.temperature}</TableCell>
+                <TableCell className="text-white/80">{record.humidity}</TableCell>
+                <TableCell>
+                  <div
+                    className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs border ${getStatusColor(record.status)}`}
+                  >
+                    {getStatusIcon(record.status)}
+                    <span className="capitalize">{record.status}</span>
+                  </div>
+                </TableCell>
+                <TableCell className="text-white/80">
+                  <span className="capitalize text-xs bg-white/10 px-2 py-1 rounded">{record.source}</span>
+                </TableCell>
+                <TableCell>
+                  <div className="flex space-x-1">
+                    <button
+                      onClick={() => setSelectedRecord(record)}
+                      className="h-8 w-8 p-0 bg-white/10 hover:bg-white/20 border-white/20"
+                    >
+                      <Eye className="h-3 w-3" />
+                    </button>
+                    <button
+                      onClick={() => deleteRecord(record.id)}
+                      className="h-8 w-8 p-0 bg-red-500/20 hover:bg-red-500/30 border-red-500/30"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
 
-        {/* Detail Modal */}
-        {selectedRecord && (
-          <Dialog open={!!selectedRecord} onOpenChange={() => setSelectedRecord(null)}>
-            <DialogContent className="backdrop-blur-md bg-white/10 border border-white/20 text-white max-w-2xl">
-              <DialogHeader>
-                <DialogTitle className="flex items-center space-x-2">
-                  <BarChart3 className="h-5 w-5" />
-                  <span>Detail Data Record</span>
-                </DialogTitle>
-                <DialogDescription className="text-white/70">
-                  Informasi lengkap untuk record ID: {selectedRecord.id}
-                </DialogDescription>
-              </DialogHeader>
-
-              <div className="space-y-6">
-                {/* Basic Info */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-white/90">Timestamp</label>
-                    <div className="bg-white/5 rounded-lg p-3 border border-white/10">
-                      <div className="flex items-center space-x-2">
-                        <Clock className="h-4 w-4 text-white/60" />
-                        <span className="text-white/80">{selectedRecord.timestamp.toLocaleString("id-ID")}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-white/90">Status</label>
-                    <div className="bg-white/5 rounded-lg p-3 border border-white/10">
-                      <div
-                        className={`inline-flex items-center space-x-2 px-3 py-1 rounded-full text-sm border ${getStatusColor(selectedRecord.status)}`}
-                      >
-                        {getStatusIcon(selectedRecord.status)}
-                        <span className="capitalize">{selectedRecord.status}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Measurements */}
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-                    <div className="text-2xl font-bold text-blue-400">{selectedRecord.aqi}</div>
-                    <div className="text-sm text-white/70">AQI</div>
-                  </div>
-                  <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-                    <div className="text-2xl font-bold text-red-400">{selectedRecord.co}</div>
-                    <div className="text-sm text-white/70">CO (ppm)</div>
-                  </div>
-                  <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-                    <div className="text-2xl font-bold text-orange-400">{selectedRecord.temperature}</div>
-                    <div className="text-sm text-white/70">Suhu (°C)</div>
-                  </div>
-                  <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-                    <div className="text-2xl font-bold text-cyan-400">{selectedRecord.humidity}</div>
-                    <div className="text-sm text-white/70">Kelembapan (%)</div>
-                  </div>
-                  {selectedRecord.pm25 && (
-                    <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-                      <div className="text-2xl font-bold text-yellow-400">{selectedRecord.pm25}</div>
-                      <div className="text-sm text-white/70">PM2.5 (μg/m³)</div>
-                    </div>
-                  )}
-                  {selectedRecord.no2 && (
-                    <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-                      <div className="text-2xl font-bold text-green-400">{selectedRecord.no2}</div>
-                      <div className="text-sm text-white/70">NO2 (ppb)</div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Additional Info */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-white/90">Informasi Tambahan</label>
-                  <div className="bg-white/5 rounded-lg p-4 border border-white/10 space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-white/70">Lokasi:</span>
-                      <span className="text-white/90">{selectedRecord.location}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-white/70">Sumber Data:</span>
-                      <span className="text-white/90 capitalize">{selectedRecord.source}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-white/70">Record ID:</span>
-                      <span className="text-white/90 font-mono text-sm">{selectedRecord.id}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
-        )}
-      </DialogContent>
-    </Dialog>
+      {/* Pagination */}
+      <div className="flex items-center justify-between mt-4">
+        <div className="text-sm text-white/70">
+          Menampilkan {indexOfFirstRecord + 1}-{Math.min(indexOfLastRecord, filteredRecords.length)} dari{" "}
+          {filteredRecords.length} data
+        </div>
+        <div className="flex space-x-2">
+          <button
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className="bg-white/10 hover:bg-white/20 border-white/20 text-white disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <span className="flex items-center px-3 py-1 text-sm text-white/80">
+            {currentPage} / {totalPages}
+          </span>
+          <button
+            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+            className="bg-white/10 hover:bg-white/20 border-white/20 text-white disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
+      </div>
+    </div>
   )
 }
